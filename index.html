@@ -82,6 +82,13 @@ figcaption { font-size: 13px; color: var(--ink-soft); text-align: center; }
 .wire td.n { color: var(--ink-soft); font-size: 12px; text-align: right; padding-right: 6px; font-variant-numeric: tabular-nums; border-right: 1px solid var(--rule); }
 .wire td.c { letter-spacing: .16em; }
 
+/* 권점: 중요한 글자 위의 작은 붉은 점 */
+.dot { -webkit-text-emphasis: filled dot var(--seal); text-emphasis: filled dot var(--seal);
+  -webkit-text-emphasis-position: over; text-emphasis-position: over right; }
+/* 일지 빈칸 */
+.blanks { background: var(--paper2); border: 1px solid var(--rule); padding: 20px 12px; display: flex; justify-content: center; gap: 10px; }
+.blanks span { width: 2.2em; height: 2.2em; border: 1.5px solid var(--ink); background: #fbf5e4; font-size: clamp(20px, 6vw, 26px); }
+
 /* 바꾼 예 / 자음 차례 */
 .pairs { background: var(--paper2); border: 1px solid var(--rule); padding: 18px 12px; display: grid; grid-template-columns: auto auto auto; justify-content: center; gap: 8px 16px;
   font-size: clamp(18px, 5vw, 22px); font-weight: 600; }
@@ -105,9 +112,7 @@ figcaption { font-size: 13px; color: var(--ink-soft); text-align: center; }
 .reveal { animation: unfold .5s ease-out; }
 @keyframes unfold { from { opacity: .2; transform: translateY(-6px); } to { opacity: 1; transform: none; } }
 
-/* 준비 중·게임 */
-.todo { border: 1.5px dashed var(--ink-soft); padding: 28px 16px; text-align: center; color: var(--ink-soft); }
-.todo b { display: block; color: var(--ink); font-size: 17px; }
+/* 게임 */
 .game { text-align: center; display: flex; flex-direction: column; gap: 16px; align-items: center; }
 .game p { margin: 0; }
 
@@ -210,14 +215,14 @@ function sha256js(str) {
   // ---------- 상황별 문서 ----------
   const lawList = items => `<ol class="law">${items.map((t, i) => `<li><span class="jo">제${i + 1}조</span><span>${t}</span></li>`).join('')}</ol>`;
   const annex = (id, text) => `<section><h2>별지 <span class="hj">別紙</span></h2>
-    <div class="annex"><p data-note="${id}">${text}</p><button class="open" type="button" data-open="${id}">별지<br>펼치기</button><div class="${id === 'annex1' ? '' : 'grid2'}" id="${id}" hidden></div></div></section>`;
+    <div class="annex"><p data-note="${id}">${text}</p><button class="open" type="button" data-open="${id}">별지<br>펼치기</button><div class="${['annex1', 'annex5'].includes(id) ? '' : 'grid2'}" id="${id}" hidden></div></div></section>`;
   const pairs = rows => `<div class="pairs">${rows.map(([a, b, q]) => `<span>${a}</span><span class="ar">→</span><span${q ? ' class="q"' : ''}>${b}</span>`).join('')}</div>`;
 
   const CASE1 = `
     <p class="lead">대한제국, 한성부 경운궁. 통감부 검문에 걸려도 들키지 않도록 밀지의 목적지를 암호로 바꿔 적어라.</p>
     <section>
       <h2>내관의 쪽지 <span class="hj">內官 書紙</span></h2>
-      <p class="intro">내관이 궁에서 쓰던 암호 연습 쪽지를 건네주었다. 법식은 적혀 있지 않고, 바꾼 예만 남아 있다.</p>
+      <p class="intro">내관이 궁에서 쓰던 암호 연습 쪽지를 건네주었다. 법식은 적혀 있지 않고, 바꾼 예만 <span class="dot">기</span>록되어 있다.</p>
       ${pairs([['이준', '지쿤'], ['경운궁', '녕춘룽'], ['한성', '간정']])}
     </section>
     <section>
@@ -228,7 +233,7 @@ function sha256js(str) {
     ${annex('annex1', '법식이 보이지 않거든 별지를 펼쳐라. 내관이 쓰던 문서의 한 구석이다.')}`;
 
   const CASE2 = `
-    <p class="lead">접선 장소에 나타난 자가 참된 동지인지, 일본의 첩자인지 가려내라.</p>
+    <p class="lead">접선 장소에 나타난 자가 참된 동지인지, 일본의 첩자인지 가려내라. 첩자는 <span class="dot">억</span>지로 꾸민 증표를 내민다.</p>
     <section>
       <h2>증표 확인법 <span class="hj">證票 確認法</span></h2>
       <p class="intro">접선하는 자가 참된 동지인지 가리려면, 그가 내민 증표수를 아래 법식으로 확인하라.</p>
@@ -264,7 +269,7 @@ function sha256js(str) {
           <li>이어 적은 것은 <b>더하고</b>, 띄어 적은 것은 서로 <b>곱한다</b>.</li></ul>`,
         '줄을 바꾸면 다음 글자다.',
         '글자 사이의 <b>빈칸도 한 글자</b>로 치니, 빠뜨리지 말라.',
-        '예시<div class="ex"><span class="mono">------.......</span><br>획 여섯(60)에 점 일곱(7)을 더하니 <b>67</b>이요, 암호표에서 67은 <b>C</b>라.</div>',
+        '예시<div class="ex"><span class="mono">------.......</span><br>획 여섯(60)에 점 일곱(7)을 더<span class="dot">하</span>니 <b>67</b>이요, 암호표에서 67은 <b>C</b>라.</div>',
       ])}
     </section>
     <section>
@@ -280,23 +285,32 @@ function sha256js(str) {
     ${annex('annex3', '점을 일일이 세기 어려우면 별지를 펼쳐라. 2부터 89까지의 소수를 점과 획으로 미리 적어둔 표다.')}`;
 
   const GAME = `
-    <p class="lead">회의장 문 앞에서 돌아선 밤. 방을 살피고 단서를 모아 세계에 목소리를 전하라.</p>
+    <p class="lead">회의장 문 앞에서 돌아선 밤. 방을 살피고 단서를 모아 세계에 목소리를 전하<span class="dot">라</span>.</p>
     <div class="game"><p>여기서부터는 헤이그 방탈출 게임으로 진행합니다.<br>게임을 마치면 받은 쪽지를 폼에 적으세요.</p>
       <a class="btn" href="game/">헤이그로 들어가기</a></div>`;
-  const TODO = n => `<div class="todo"><b>자료 준비 중</b>${n}번 문항 자료는 곧 이 자리에 실릴 예정입니다.</div>`;
+  const CASE5 = `
+    <p class="lead">1907년 7월, 귀국길에 오른 증기선 위. 김도진은 헤이그까지의 일을 일지에 옮겨 적으려 한다.</p>
+    <section>
+      <h2>일지 첫 장 <span class="hj">日誌</span></h2>
+      <p class="intro">이 일지의 첫 문장은 이미 적혀 있다. 지나온 길 위에, 붉은 점으로.</p>
+      <div class="blanks" aria-label="빈칸 네 개"><span></span><span></span><span></span><span></span></div>
+      <p class="ask">일지의 첫 문장을 적으라.</p>
+    </section>
+    ${annex('annex5', '어디를 봐야 할지 모르겠거든 별지를 펼쳐라.')}`;
 
   // answer: 이 문항 정답의 해시(다음 장을 연다). null이면 정답 확인 없이 '다음 장' 버튼.
   const QS = [
     { k: '상황 1', t: '밀지 암호', html: CASE1, answer: '472d66a988a3341a6ab7827c7c282cf027d5de914f9f3ca3ccf341da4121d59e' },
-    { k: '상황 2', t: '증표 확인', html: CASE2, answer: null },
-    { k: '상황 3', t: '밀전 해독', html: CASE3, answer: null },
+    { k: '상황 2', t: '증표 확인', html: CASE2, answer: '762f2a688c76f91971e8b7c0d6144c37d683354b4b41ea60e1f3ad5f353bbcb4' },
+    { k: '상황 3', t: '밀전 해독', html: CASE3, answer: 'd6702a0c55c20c38bb9fa67eb62aac29d79387ece1f5e50972540d910d9a1e42' },
     { k: '상황 4', t: '닫힌 문 너머로', html: GAME, answer: 'bdf994a04a96261467ced466c6b4e59590c378aa911acf699dd373bdfc347938',
       gateText: '게임을 마치고 받은 쪽지 내용을 폼에 적었다면, 같은 내용을 여기에도 적으세요. 게임을 이 기기에서 마쳤다면 다음 장이 저절로 열립니다.' },
-    { k: '상황 5', t: '5번 문항', html: TODO(5), answer: null },
+    { k: '상황 5', t: '귀국 일지', html: CASE5, answer: null },
   ];
 
   // 별지 표 내용
   const ANNEX = {
+    annex5: { note: '권점(圈點)은 옛 문서에서 중요한 글자 위에 찍던 붉은 점이다. 지나온 장의 글자들을 다시 살펴라. 장의 차례대로 읽으면 된다.' },
     annex1: { note: '자음의 차례 — 끝에 다다르면 처음으로 돌아간다. 바뀐 칸 수를 글자마다 세어보라.',
       html: () => `<div class="order" aria-label="자음 순서">${'ㄱㄴㄷㄹㅁㅂㅅㅇㅈㅊㅋㅌㅍㅎ'.split('').map(c => `<span>${c}</span>`).join('')}<i>↺ ㄱ</i></div>` },
     annex2: { note: '甲(55) 배수표 — 1728을 넘지 않는 가장 큰 수를 찾아라.',
@@ -359,7 +373,7 @@ function sha256js(str) {
       const d = el('div'); d.append(el('span', { class: 'v' }), el('span', { class: 's' }));
       d.firstChild.textContent = v; d.lastChild.textContent = s; box.appendChild(d);
     });
-    box.hidden = false;
+    box.hidden = !box.innerHTML;
     if (anim) box.classList.add('reveal');
   }
 
