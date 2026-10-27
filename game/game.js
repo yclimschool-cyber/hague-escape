@@ -243,8 +243,11 @@ function sha256js(str) {
   // 얼굴은 그리지 않고 실루엣으로 두되, 옷차림과 장신구로 인물을 구별한다.
   // 로컬 좌표: 머리 꼭대기 y=0, 몸 가운데 x=0, 서 있을 때 키 약 196. person(x, 머리 꼭대기 y, 배율, 자세, 옵션)
   // 자세: 'stand' 선 모습, 'seat' 의자에 앉은 모습, 'desk' 책상 너머 상반신(펜을 쥠)
+  // 팔 arms: 'side' 내린 팔, 'clasp' 지팡이 위에 모은 손, 'desk' 책상 위 두 손, 'pocketRead' 한 손은 주머니·한 손은 교정지,
+  //          'lectern' 한 손은 연단·한 손은 들어 올림
+  // 다리 legs: 'stand' 곧게 섬, 'contra' 한쪽에 무게를 싣고 섬, 'crossed' 다리를 꼬고 앉음
   // 옵션: beard 흰 수염, mustache 콧수염, specs 둥근 안경, watch 회중시계 줄, square 행커치프, vest 조끼 단추,
-  //       cane 지팡이, lapHat 무릎 위 중절모, hat 중절모, overcoat 긴 외투, paper 펼친 신문, scroll 말아 쥔 원고, hair 머리색
+  //       cane 지팡이, lapHat 무릎 위 중절모, hat 중절모, overcoat 긴 외투, paper 펼친 신문, tilt 고개 기울기(도), hair 머리색
   // 인물별 차림 (장면과 대사창 초상이 같이 쓴다)
   const LOOK = {
     '이준': { mustache: 1, watch: 1 },
@@ -252,52 +255,70 @@ function sha256js(str) {
     '스테드': { beard: 1, specs: 1, vest: 1, watch: 1, hair: '#cfc6b3' },
   };
   const SIL = '#1f1812', SIL2 = '#2b2119', GOLD = '#c8a24a', LINEN = '#e9e0cb';
+  const shoe = (x, y, dir = 1) => `<path d="M${x - 7 * dir} ${y} h${14 * dir} q${2 * dir} 5 ${-3 * dir} 5 h${-11 * dir}z" fill="#0b0805"/>`;
   function person(x, top, s, pose, o = {}) {
     const long = o.overcoat && pose === 'stand';
-    const body = {
-      stand: long
-        ? 'M-24 44 Q-22 34 -8 31 L0 58 L8 31 Q22 34 24 44 L29 150 L-29 150Z'
-        : 'M-23 44 Q-21 36 -7 33 L0 60 L7 33 Q21 36 23 44 L27 108 Q26 113 21 112 L19 74 L18 128 L-18 128 L-19 74 L-21 112 Q-26 113 -27 108Z',
-      seat: 'M-23 44 Q-21 36 -7 33 L0 60 L7 33 Q21 36 23 44 L26 100 Q25 106 20 106 L19 74 L19 112 L-19 112 L-19 74 L-20 106 Q-25 106 -26 100Z',
-      desk: 'M-23 44 Q-21 36 -7 33 L0 60 L7 33 Q21 36 23 44 L26 76 L-26 76Z',
-    }[pose];
+    const arms = o.arms || { stand: long ? 'none' : 'side', seat: 'clasp', desk: 'desk' }[pose];
+    const legs = o.legs || (pose === 'seat' ? 'crossed' : pose === 'stand' ? 'stand' : '');
+    const hem = { stand: 128, seat: 110, desk: 76 }[pose];
     let g = '';
-    // 다리와 구두 (구두코에 작은 광)
-    if (pose === 'stand') g += '<path d="M-16 126 L-14 190 L-3 190 L-1 132 L1 132 L3 190 L14 190 L16 126Z" fill="#15100b"/>'
-      + '<path d="M-17 190 h14 q2 5 -3 5 h-12z M3 190 h14 q2 5 -3 5 h-12z" fill="#0b0805"/><path d="M-14 191.6 h4 M6 191.6 h4" stroke="#5a4a38" stroke-width=".8"/>';
-    if (pose === 'seat') g += '<path d="M-18 104 L-23 126 L-16 160 L-6 160 L-9 128 L9 128 L6 160 L16 160 L23 126 L18 104Z" fill="#15100b"/>'
-      + '<path d="M-19 160 h14 q2 5 -3 5 h-12z M5 160 h14 q2 5 -3 5 h-12z" fill="#0b0805"/>';
+
+    // 다리와 구두
+    if (legs === 'stand') g += '<path d="M-16 126 L-14 190 L-3 190 L-1 132 L1 132 L3 190 L14 190 L16 126Z" fill="#15100b"/>' + shoe(-10, 190) + shoe(10, 190);
+    if (legs === 'contra') g += '<path d="M-17 126 L-15 190 L-4 190 L-1 132Z M1 132 L16 126 L20 160 L24 190 L13 190 L9 161Z" fill="#15100b"/>' + shoe(-10, 190) + shoe(20, 190);
+    if (legs === 'crossed') g += '<path d="M2 106 L21 108 L20 126 L17 162 L7 162 L8 128Z" fill="#15100b"/>' + shoe(12, 162)
+      + '<path d="M-20 104 L-17 120 L14 128 L20 116Z M10 120 L22 118 L35 146 L27 151Z" fill="#191209"/>'
+      + '<path d="M26 148 l11 -5 q4 3 0 7 l-9 3z" fill="#0b0805"/>';
+
+    // 몸통, 셔츠, 넥타이, 높은 깃, 옷깃 선, 단추
     g += `<rect x="-5" y="26" width="10" height="10" fill="${SIL}"/>`;
-    g += `<path d="${body}" fill="${SIL2}"/>`;
-    // 셔츠, 넥타이, 높은 깃, 옷깃 선, 단추
+    g += long
+      ? `<path d="M-24 44 Q-22 34 -8 31 L0 58 L8 31 Q22 34 24 44 L29 150 L-29 150Z" fill="${SIL2}"/>`
+      : `<path d="M-21 44 Q-20 36 -7 33 L0 60 L7 33 Q20 36 21 44 L${pose === 'stand' ? 22 : 20} ${hem} L${pose === 'stand' ? -22 : -20} ${hem}Z" fill="${SIL2}"/>`;
     g += `<path d="M-6 34 L0 58 L6 34Z" fill="#d6ccb4"/><path d="M-1.6 38 L1.6 38 L1 50 L0 52 L-1 50Z" fill="${SIL}"/>`
       + `<path d="M-6.5 33 L0 39 L6.5 33 L5 31 L0 35 L-5 31Z" fill="${LINEN}"/>`
       + '<path d="M-7 33 L-12 50 L-2 62 M7 33 L12 50 L2 62" stroke="#4a3828" stroke-width="1.2" fill="none"/>';
     if (pose !== 'desk') g += '<circle cx="0" cy="70" r="1.1" fill="#4a3828"/><circle cx="0" cy="82" r="1.1" fill="#4a3828"/>';
+    if (pose === 'stand' && !long) g += '<path d="M0 90 L-3 128 M0 90 L3 128" stroke="#17110b" stroke-width="1" fill="none"/>';
     if (long) g += '<path d="M-8 31 L-16 40 L-11 58 M8 31 L16 40 L11 58" stroke="#3d2f22" stroke-width="1.4" fill="none"/><path d="M0 58 V150" stroke="#140f0a" stroke-width="1"/>';
     if (o.vest) g += `<path d="M-5.4 52 L0 60 L5.4 52" stroke="#3d2f22" stroke-width="1" fill="none"/><circle cx="0" cy="56" r=".9" fill="${GOLD}"/><circle cx="0" cy="62" r=".9" fill="${GOLD}"/>`;
     if (o.watch) g += `<path d="M-12 68 Q-6 75 0 66" stroke="${GOLD}" stroke-width="1.1" fill="none"/><circle cx="-12" cy="68" r="1.5" fill="${GOLD}"/>`;
     if (o.square) g += `<path d="M11 50 l3 -4 l2 3 l2 -3 l1 5z" fill="${LINEN}"/>`;
-    // 손 (실루엣)
-    if (pose === 'stand' && !long) g += `<path d="M-19 74 L-18 108 M19 74 L18 108" stroke="#0e0a06" stroke-width="1" fill="none"/><ellipse cx="-24" cy="114" rx="3.6" ry="5" fill="${SIL}"/><ellipse cx="24" cy="114" rx="3.6" ry="5" fill="${SIL}"/>`;
-    if (pose === 'seat') g += `<ellipse cx="-21" cy="110" rx="4" ry="4.6" fill="${SIL}"/><ellipse cx="21" cy="110" rx="4" ry="4.6" fill="${SIL}"/>`;
-    if (pose === 'desk') g += `<path d="M-25 58 L-10 76 L-3 72 L-19 52Z M25 58 L12 76 L5 72 L19 52Z" fill="${SIL2}"/>`
-      + `<path d="M-12 72 l3 3 M10 72 l-3 3" stroke="${LINEN}" stroke-width="1.6"/>`
-      + `<ellipse cx="-7" cy="76" rx="5" ry="3.6" fill="${SIL}"/><ellipse cx="9" cy="76" rx="5" ry="3.6" fill="${SIL}"/>`
+
+    // 팔과 손 (소매 끝에 흰 셔츠 커프스)
+    const hand = (cx, cy, rx = 3.6, ry = 4.6) => `<ellipse cx="${cx}" cy="${cy}" rx="${rx}" ry="${ry}" fill="${SIL}"/>`;
+    if (arms === 'side') g += `<path d="M-21 44 Q-27 46 -27 60 L-27 108 L-21 109 L-19 60Z M21 44 Q27 46 27 60 L27 108 L21 109 L19 60Z" fill="${SIL2}" stroke="#3d2e21" stroke-width="1.1"/>`
+      + `<path d="M-27 107 h6 M21 107 h6" stroke="${LINEN}" stroke-width="1.6"/>` + hand(-24, 114) + hand(24, 114);
+    if (arms === 'clasp') {
+      if (o.cane) g += `<line x1="1" y1="92" x2="3" y2="164" stroke="#3a2614" stroke-width="2.4"/><path d="M-4 92 Q1 85 6 90" stroke="${GOLD}" stroke-width="2.4" fill="none"/>`;
+      g += `<path d="M-21 44 Q-27 48 -26 64 L-8 94 L-2 88 L-17 66Z M21 44 Q27 48 26 64 L8 94 L2 88 L17 66Z" fill="${SIL2}" stroke="#3d2e21" stroke-width="1.1"/>`
+        + `<path d="M-8 92 l4 -4 M8 92 l-4 -4" stroke="${LINEN}" stroke-width="1.6"/>` + hand(-1, 92, 4.4, 3.6) + hand(3, 94, 4.4, 3.6);
+    }
+    if (arms === 'desk') g += `<path d="M-25 58 L-10 76 L-3 72 L-19 52Z M25 58 L12 76 L5 72 L19 52Z" fill="${SIL2}" stroke="#3d2e21" stroke-width="1.1"/>`
+      + `<path d="M-12 72 l3 3 M10 72 l-3 3" stroke="${LINEN}" stroke-width="1.6"/>` + hand(-7, 76, 5, 3.6) + hand(9, 76, 5, 3.6)
       + `<line x1="10" y1="77" x2="20" y2="62" stroke="#0b0805" stroke-width="1.4"/><path d="M20 62 l1 -2" stroke="${GOLD}" stroke-width="1.4"/>`;
-    if (o.cane) g += `<line x1="2" y1="92" x2="4" y2="164" stroke="#3a2614" stroke-width="2.4"/><path d="M-3 92 Q2 86 6 91" stroke="${GOLD}" stroke-width="2.2" fill="none"/>`;
-    if (o.lapHat) g += '<path d="M10 104 Q10 92 20 92 Q30 92 30 104Z" fill="#0d0905"/><ellipse cx="20" cy="104" rx="14" ry="3" fill="#0d0905"/><path d="M10.4 101 h19.2" stroke="#3a2c20" stroke-width="1.4"/>';
-    if (o.scroll) g += `<g transform="rotate(-14 26 108)"><rect x="20" y="94" width="11" height="26" rx="2" fill="${LINEN}"/><path d="M20 99 h11 M20 115 h11" stroke="#8a7a5c" stroke-width=".8"/></g><ellipse cx="24" cy="112" rx="3.6" ry="4.6" fill="${SIL}"/>`;
+    if (arms === 'pocketRead') g += `<path d="M-21 44 Q-29 48 -32 70 L-24 94 L-17 92 L-23 70 L-19 56Z" fill="${SIL2}" stroke="#3d2e21" stroke-width="1.1"/><path d="M-19 92 l5 -1" stroke="#0e0a06" stroke-width="1.2"/>`
+      + `<path d="M21 44 Q28 48 28 64 L16 80 L10 74 L19 62Z" fill="${SIL2}" stroke="#3d2e21" stroke-width="1.1"/>`
+      + `<g transform="rotate(-12 18 72)"><rect x="6" y="54" width="24" height="34" fill="#e3dac4"/><path d="M9 60 h18 M9 64 h18 M9 68 h18 M9 72 h14 M9 76 h18 M9 80 h10" stroke="#8a826e" stroke-width=".9"/></g>`
+      + `<path d="M11 76 l4 -3" stroke="${LINEN}" stroke-width="1.6"/>` + hand(11, 79, 3.6, 4);
+    if (arms === 'lectern') g += `<path d="M-21 44 Q-27 48 -26 66 L-13 88 L-7 84 L-18 64Z" fill="${SIL2}" stroke="#3d2e21" stroke-width="1.1"/><path d="M-13 86 l5 -3" stroke="${LINEN}" stroke-width="1.6"/>` + hand(-9, 88, 4.4, 3.4)
+      + `<path d="M20 43 Q31 44 37 58 L44 35 L34 31 L29 50 L19 52Z" fill="${SIL2}" stroke="#3d2e21" stroke-width="1.1"/><path d="M34 33 l10 3" stroke="${LINEN}" stroke-width="1.8"/>`
+      + `<ellipse cx="40" cy="26" rx="4.6" ry="6.4" transform="rotate(14 40 26)" fill="${SIL}"/><ellipse cx="35" cy="29" rx="1.8" ry="3.4" transform="rotate(-30 35 29)" fill="${SIL}"/>`;
+
+    if (o.lapHat) g += '<path d="M8 110 Q8 98 18 98 Q28 98 28 110Z" fill="#0d0905"/><ellipse cx="18" cy="110" rx="14" ry="3" fill="#0d0905"/><path d="M8.4 107 h19.2" stroke="#3a2c20" stroke-width="1.4"/>';
+
     // 머리: 얼굴 없이 실루엣, 가르마 진 머리와 귀로 윤곽을 잡는다
-    g += `<ellipse cx="-10.6" cy="18" rx="2.2" ry="3.6" fill="${SIL}"/><ellipse cx="10.6" cy="18" rx="2.2" ry="3.6" fill="${SIL}"/>`
-      + `<ellipse cx="0" cy="17" rx="10.6" ry="13.2" fill="${SIL}"/>`;
-    g += `<path d="M-11.4 15 Q-12.4 0.4 -1 0.8 Q12.4 0.4 11.4 15 Q10 6 2 5.4 Q-4 5 -8 8 Q-10.4 10 -11.4 15Z" fill="${o.hair || '#120c07'}"/>`;
-    if (o.mustache) g += '<path d="M-6 23.4 Q-2 21.4 0 22.8 Q2 21.4 6 23.4 Q3 25 0 24 Q-3 25 -6 23.4Z" fill="#0b0705"/>';
-    if (o.beard) g += '<path d="M-10.4 18 Q-14 42 0 49 Q14 42 10.4 18 Q8 27 0 27.6 Q-8 27 -10.4 18Z" fill="#cfc7b5"/><path d="M-5 24.6 Q0 22.4 5 24.6" stroke="#cfc7b5" stroke-width="2" fill="none"/>';
-    if (o.specs) g += '<g fill="none" stroke="#d6cdb8" stroke-width=".9"><circle cx="-4" cy="16.4" r="3"/><circle cx="4" cy="16.4" r="3"/><path d="M-1 16.2 h2 M-7 16 l-3.4 -1 M7 16 l3.4 -1"/></g>';
-    if (o.hat) g += '<path d="M-10.6 5 Q-10.6 -11 0 -11 Q10.6 -11 10.6 5Z" fill="#0d0905"/><ellipse cx="0" cy="5" rx="16" ry="3.2" fill="#0d0905"/><path d="M-10.4 2 h20.8" stroke="#3a2c20" stroke-width="1.6"/>';
+    let h = `<ellipse cx="-10.6" cy="18" rx="2.2" ry="3.6" fill="${SIL}"/><ellipse cx="10.6" cy="18" rx="2.2" ry="3.6" fill="${SIL}"/>`
+      + `<ellipse cx="0" cy="17" rx="10.6" ry="13.2" fill="${SIL}"/>`
+      + `<path d="M-11.4 15 Q-12.4 0.4 -1 0.8 Q12.4 0.4 11.4 15 Q10 6 2 5.4 Q-4 5 -8 8 Q-10.4 10 -11.4 15Z" fill="${o.hair || '#120c07'}"/>`;
+    if (o.mustache) h += '<path d="M-6 23.4 Q-2 21.4 0 22.8 Q2 21.4 6 23.4 Q3 25 0 24 Q-3 25 -6 23.4Z" fill="#0b0705"/>';
+    if (o.beard) h += '<path d="M-10.4 17 Q-14 42 0 49 Q14 42 10.4 17 Q8 22 4 22.4 Q0 20.8 -4 22.4 Q-8 22 -10.4 17Z" fill="#cfc7b5"/>';
+    if (o.specs) h += '<g fill="none" stroke="#d6cdb8" stroke-width=".9"><circle cx="-4" cy="16.4" r="3"/><circle cx="4" cy="16.4" r="3"/><path d="M-1 16.2 h2 M-7 16 l-3.4 -1 M7 16 l3.4 -1"/></g>';
+    if (o.hat) h += '<path d="M-10.6 5 Q-10.6 -11 0 -11 Q10.6 -11 10.6 5Z" fill="#0d0905"/><ellipse cx="0" cy="5" rx="16" ry="3.2" fill="#0d0905"/><path d="M-10.4 2 h20.8" stroke="#3a2c20" stroke-width="1.6"/>';
+    g += o.tilt ? `<g transform="rotate(${o.tilt} 0 30)">${h}</g>` : h;
+
     if (o.paper) g += '<g transform="rotate(-5)"><rect x="-21" y="54" width="42" height="30" fill="#d6cfba"/><path d="M-16 61 h14 M-16 66 h14 M-16 71 h14 M2 61 h14 M2 66 h14 M2 71 h10 M0 54 v30" stroke="#8a826e" stroke-width="1"/></g>'
-      + `<ellipse cx="-21" cy="70" rx="3.6" ry="4.6" fill="${SIL}"/><ellipse cx="21" cy="66" rx="3.6" ry="4.6" fill="${SIL}"/>`;
+      + hand(-21, 70) + hand(21, 66);
     return `<g transform="translate(${x} ${top}) scale(${s})">${g}</g>`;
   }
   // 뒤에서 본 청중 (어깨, 뒷머리, 모자)
@@ -345,8 +366,12 @@ function sha256js(str) {
       <path d="M186 44 h${cw} v152 q-${cw / 2} 8 -${cw} 0z" fill="#7a2018"/><path d="M314 44 h-${cw} v152 q${cw / 2} 8 ${cw} 0z" fill="#7a2018"/>
       <path d="M196 46 v148 M206 46 v150 M304 46 v148 M294 46 v150" stroke="#5e1611" stroke-width="2"/>`,
       [[180, 40, 32, 164], [288, 40, 32, 164]])}
-    ${obj('leejun', `<rect x="334" y="204" width="7" height="100" fill="#2c1c0e"/><rect x="296" y="262" width="46" height="7" fill="#2c1c0e"/><rect x="299" y="269" width="5" height="34" fill="#2c1c0e"/>${person(318, 182, 0.74, 'seat', { ...LOOK['이준'], cane: 1, lapHat: 1 })}`,
-      [[294, 176, 50, 126]])}
+    ${obj('leejun', `<path d="M296 268 L296 224 Q318 206 340 224 L340 268Z" fill="#5a2a1c" stroke="#2c1c0e" stroke-width="2"/>
+      <path d="M306 226 v34 M318 218 v42 M330 226 v34" stroke="#4a2016" stroke-width="1.2"/>
+      <rect x="292" y="262" width="52" height="9" rx="2" fill="#4a2216" stroke="#2c1c0e"/><rect x="294" y="270" width="5" height="34" fill="#2c1c0e"/><rect x="337" y="270" width="5" height="34" fill="#2c1c0e"/>
+      ${person(318, 182, 0.74, 'seat', { ...LOOK['이준'], cane: 1, lapHat: 1, tilt: -6 })}
+      <path d="M286 246 q0 -6 7 -6 h5 v30 h-12z M350 246 q0 -6 -7 -6 h-5 v30 h12z" fill="#5a2a1c" stroke="#2c1c0e" stroke-width="1.6"/>`,
+      [[286, 176, 64, 128]])}
     ${obj('calendar', `<rect x="30" y="52" width="52" height="68" fill="#efe3c6" stroke="#5a4028"/><rect x="30" y="52" width="52" height="15" fill="#8f2a1d"/>
       <text x="56" y="63" font-size="9" text-anchor="middle" fill="#efe3c6" font-family="serif">1907</text><text x="56" y="76" font-size="7" text-anchor="middle" fill="#3b2a1a" font-family="serif">APRIL</text>${calGrid}`,
       [[26, 48, 60, 76]])}
@@ -394,7 +419,7 @@ function sha256js(str) {
       <circle cx="56" cy="172" r="14" fill="#efe3c6" stroke="#3a2614" stroke-width="3"/><path d="M56 172 v-8 M56 172 h6" stroke="#3a2614" stroke-width="1.6"/>
       <rect x="170" y="438" width="14" height="10" fill="#e6dcc3" transform="rotate(20 176 442)"/><rect x="128" y="462" width="12" height="9" fill="#dcd1b6" transform="rotate(-14 134 466)"/></g>
     ${obj('board', `<rect x="176" y="40" width="168" height="168" fill="#6f4d2b" stroke="#3d2914" stroke-width="6"/>${cards}`, [[172, 36, 176, 176]])}
-    ${obj('host', person(131, 112, 0.7, 'stand', LOOK['스테드']), [[104, 112, 54, 140]])}
+    ${obj('host', person(130, 104, 0.94, 'stand', { ...LOOK['스테드'], arms: 'pocketRead', legs: 'contra', tilt: 7 }), [[98, 100, 70, 194]])}
     ${obj('typeset', `<polygon points="16,304 166,304 160,356 22,356" fill="#5a3b20" stroke="#2e1d0f" stroke-width="3"/>${caseGrid}
       <rect x="24" y="356" width="8" height="40" fill="#2e1d0f"/><rect x="150" y="356" width="8" height="40" fill="#2e1d0f"/>`, [[12, 296, 158, 100]])}
     ${obj('press', `<rect x="210" y="262" width="120" height="20" fill="#26221f"/><rect x="222" y="282" width="16" height="130" fill="#26221f"/><rect x="302" y="282" width="16" height="130" fill="#26221f"/>
@@ -444,9 +469,10 @@ function sha256js(str) {
       <circle cx="180" cy="74" r="96" fill="url(#glowH)"/><line x1="180" y1="-300" x2="180" y2="60" stroke="#1e140b" stroke-width="1.5"/>
       <path d="M156 66 q24 16 48 0" stroke="#c8a24a" stroke-width="2.4" fill="none"/>${[156, 168, 180, 192, 204].map(x => `<circle cx="${x}" cy="${x === 180 ? 76 : 70}" r="2.4" fill="#ffe7a8"/>`).join('')}
       <polygon points="170,40 190,40 236,284 124,284" fill="url(#beam)"/></g>
-    ${obj('podium', `<polygon points="156,176 204,176 198,254 162,254" fill="#3e2814" stroke="#24170b" stroke-width="2"/><rect x="150" y="170" width="60" height="10" fill="#5a3b20"/>`,
-      [[146, 164, 68, 92]])}
-    ${obj('leewj', person(240, 150, 0.52, 'stand', { ...LOOK['이위종'], scroll: 1 }), [[218, 144, 46, 110]])}
+    ${obj('leewj', person(180, 107, 0.7, 'stand', { ...LOOK['이위종'], arms: 'lectern' }), [[152, 96, 66, 76]])}
+    ${obj('podium', `<polygon points="156,176 204,176 198,254 162,254" fill="#3e2814" stroke="#24170b" stroke-width="2"/><rect x="150" y="170" width="60" height="10" fill="#5a3b20"/>
+      <rect x="168" y="165" width="22" height="6" fill="#e9e0cb" transform="rotate(-4 179 168)"/>`,
+      [[146, 170, 68, 86]])}
     ${obj('papers', `<rect x="80" y="304" width="34" height="24" fill="#efe3c6" transform="rotate(-18 97 316)"/><rect x="130" y="320" width="34" height="24" fill="#e6dcc3" transform="rotate(12 147 332)"/>
       <rect x="182" y="300" width="34" height="24" fill="#efe3c6" transform="rotate(-6 199 312)"/><rect x="226" y="326" width="34" height="24" fill="#ece2c8" transform="rotate(24 243 338)"/>
       <rect x="110" y="344" width="34" height="24" fill="#e6dcc3" transform="rotate(4 127 356)"/><rect x="250" y="296" width="34" height="24" fill="#efe3c6" transform="rotate(-30 267 308)"/>`,
