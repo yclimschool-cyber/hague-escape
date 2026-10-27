@@ -239,14 +239,60 @@ function sha256js(str) {
     <circle cx="48" cy="32" r="14" fill="#2a4f9b"/><path d="M34 32 A14 14 0 0 1 62 32 A7 7 0 0 1 48 32 A7 7 0 0 0 34 32Z" fill="#b8302a"/>
     ${trigram('111', 18, 14, -33.7)}${trigram('010', 78, 14, 33.7)}${trigram('101', 18, 50, 33.7)}${trigram('000', 78, 50, -33.7)}</svg>`;
 
-  const fig = (cx, top, w, h, fill = '#1f1812') =>
-    `<circle cx="${cx}" cy="${top + 11}" r="11" fill="${fill}"/><path d="M${cx - w / 2} ${top + h} q0 -${h - 30} ${w / 2} -${h - 26} q${w / 2} 4 ${w / 2} ${h - 26}z" fill="${fill}"/>`;
+  // ---------- 인물: 1907년 양복 차림 실루엣 ----------
+  // 로컬 좌표: 머리 꼭대기 y=0, 몸 가운데 x=0, 서 있을 때 키 약 196. person(x, 머리 꼭대기 y, 배율, 자세, 옵션)
+  // 자세: 'stand' 선 모습, 'seat' 의자에 앉은 모습, 'desk' 책상 너머 상반신(펜을 쥠)
+  // 옵션: beard 흰 수염, mustache 콧수염, hair 머리색, hat 중절모, paper 펼친 신문
+  function person(x, top, s, pose, o = {}) {
+    const body = {
+      stand: 'M-23 44 Q-21 36 -7 33 L0 60 L7 33 Q21 36 23 44 L27 108 Q26 113 21 112 L19 74 L18 128 L-18 128 L-19 74 L-21 112 Q-26 113 -27 108Z',
+      seat: 'M-23 44 Q-21 36 -7 33 L0 60 L7 33 Q21 36 23 44 L26 100 Q25 106 20 106 L19 74 L19 112 L-19 112 L-19 74 L-20 106 Q-25 106 -26 100Z',
+      desk: 'M-23 44 Q-21 36 -7 33 L0 60 L7 33 Q21 36 23 44 L26 76 L-26 76Z',
+    }[pose];
+    let g = '';
+    if (pose === 'stand') g += '<path d="M-16 126 L-14 190 L-3 190 L-1 132 L1 132 L3 190 L14 190 L16 126Z" fill="#15100b"/><ellipse cx="-9" cy="192" rx="8" ry="3.4" fill="#0b0805"/><ellipse cx="9" cy="192" rx="8" ry="3.4" fill="#0b0805"/>';
+    if (pose === 'seat') g += '<path d="M-18 104 L-23 126 L-16 160 L-6 160 L-9 128 L9 128 L6 160 L16 160 L23 126 L18 104Z" fill="#15100b"/><ellipse cx="-11" cy="162" rx="8" ry="3.4" fill="#0b0805"/><ellipse cx="11" cy="162" rx="8" ry="3.4" fill="#0b0805"/>';
+    g += '<rect x="-5" y="26" width="10" height="10" fill="#2a1e14"/>';
+    g += `<path d="${body}" fill="url(#figCoat)"/>`;
+    // 셔츠, 넥타이, 깃, 옷깃 선
+    g += '<path d="M-6 34 L0 58 L6 34Z" fill="#d6ccb4"/><path d="M-1.6 38 L1.6 38 L1 50 L0 52 L-1 50Z" fill="#2a1d14"/>'
+      + '<path d="M-6.5 33 L0 39 L6.5 33 L5 31 L0 35 L-5 31Z" fill="#efe6d2"/>'
+      + '<path d="M-7 33 L-12 50 L-2 62 M7 33 L12 50 L2 62" stroke="#4a3828" stroke-width="1.2" fill="none"/>';
+    if (pose === 'stand') g += '<path d="M-19 74 L-18 108 M19 74 L18 108" stroke="#0e0a06" stroke-width="1" fill="none"/><ellipse cx="-24" cy="114" rx="3.6" ry="5" fill="url(#figSkin)"/><ellipse cx="24" cy="114" rx="3.6" ry="5" fill="url(#figSkin)"/>';
+    if (pose === 'seat') g += '<ellipse cx="-21" cy="110" rx="4" ry="4.6" fill="url(#figSkin)"/><ellipse cx="21" cy="110" rx="4" ry="4.6" fill="url(#figSkin)"/>';
+    if (pose === 'desk') g += '<path d="M-25 58 L-10 76 L-3 72 L-19 52Z M25 58 L12 76 L5 72 L19 52Z" fill="url(#figCoat)"/>'
+      + '<ellipse cx="-7" cy="76" rx="5" ry="3.6" fill="url(#figSkin)"/><ellipse cx="9" cy="76" rx="5" ry="3.6" fill="url(#figSkin)"/>'
+      + '<line x1="10" y1="77" x2="20" y2="64" stroke="#0b0805" stroke-width="1.4"/>';
+    // 머리
+    g += '<ellipse cx="-10.6" cy="18" rx="2.1" ry="3.4" fill="#3a2a1c"/><ellipse cx="10.6" cy="18" rx="2.1" ry="3.4" fill="#3a2a1c"/>'
+      + '<ellipse cx="0" cy="17" rx="10.6" ry="13.2" fill="url(#figSkin)"/>'
+      // 눈썹, 눈, 콧날, 입
+      + '<path d="M-6 13.6 h4 M2 13.6 h4" stroke="#1a110a" stroke-width="1.1"/><ellipse cx="-4" cy="16.6" rx="1.3" ry=".9" fill="#120b06"/><ellipse cx="4" cy="16.6" rx="1.3" ry=".9" fill="#120b06"/>'
+      + '<path d="M0 17 L-1.2 21.6 L1 22" stroke="#2e2016" stroke-width=".9" fill="none"/><path d="M-2.6 25.2 h5.2" stroke="#2a1a10" stroke-width="1"/>';
+    if (o.mustache) g += '<path d="M-4.8 23.6 Q0 21.4 4.8 23.6 Q0 25 -4.8 23.6Z" fill="#120c07"/>';
+    if (o.beard) g += '<path d="M-10 19 Q-13 40 0 47 Q13 40 10 19 Q7 27 0 27.6 Q-7 27 -10 19Z" fill="#d8d0bf"/><path d="M-5 24.6 Q0 22.6 5 24.6" stroke="#b9b09d" stroke-width="1.6" fill="none"/>';
+    g += `<path d="M-10.8 15 Q-11.4 1.6 0 1.6 Q11.4 1.6 10.8 15 Q9.4 7.6 0 7.2 Q-9.4 7.6 -10.8 15Z" fill="${o.hair || '#120c07'}"/>`;
+    if (o.hat) g += '<path d="M-10.6 5 Q-10.6 -11 0 -11 Q10.6 -11 10.6 5Z" fill="#0d0905"/><ellipse cx="0" cy="5" rx="16" ry="3.2" fill="#0d0905"/>';
+    if (o.paper) g += '<g transform="rotate(-5)"><rect x="-21" y="54" width="42" height="30" fill="#d6cfba"/><path d="M-16 61 h14 M-16 66 h14 M-16 71 h14 M2 61 h14 M2 66 h14 M2 71 h10 M0 54 v30" stroke="#8a826e" stroke-width="1"/></g>'
+      + '<ellipse cx="-21" cy="70" rx="3.6" ry="4.6" fill="url(#figSkin)"/><ellipse cx="21" cy="66" rx="3.6" ry="4.6" fill="url(#figSkin)"/>';
+    return `<g transform="translate(${x} ${top}) scale(${s})">${g}</g>`;
+  }
+  // 뒤에서 본 청중 (어깨, 뒷머리, 모자)
+  function backOf(x, y, hat) {
+    let g = `<path d="M${x - 23} ${y + 42} Q${x - 22} ${y + 14} ${x} ${y + 12} Q${x + 22} ${y + 14} ${x + 23} ${y + 42}Z" fill="url(#figCoat)"/>`
+      + `<rect x="${x - 4}" y="${y + 6}" width="8" height="8" fill="#2a1e14"/><ellipse cx="${x}" cy="${y}" rx="9" ry="10.6" fill="#120c07"/>`;
+    if (hat === 1) g += `<path d="M${x - 9} ${y - 3} Q${x - 9} ${y - 17} ${x} ${y - 17} Q${x + 9} ${y - 17} ${x + 9} ${y - 3}Z" fill="#0d0905"/><ellipse cx="${x}" cy="${y - 3}" rx="13" ry="2.6" fill="#0d0905"/>`;
+    if (hat === 2) g += `<rect x="${x - 9}" y="${y - 12}" width="18" height="8" fill="#b9a46e"/><rect x="${x - 9}" y="${y - 6}" width="18" height="2" fill="#3a2614"/><ellipse cx="${x}" cy="${y - 4}" rx="14" ry="2.4" fill="#a8935c"/>`;
+    return g;
+  }
   const obj = (id, ph, hits) => `<g class="obj" data-o="${id}"><g class="ph">${ph}</g>${hits.map(r => `<rect class="hit" x="${r[0]}" y="${r[1]}" width="${r[2]}" height="${r[3]}"/>`).join('')}</g>`;
   const svgWrap = (room, inner, dim = 0) => `<svg class="room" viewBox="0 0 360 480" preserveAspectRatio="xMidYMid meet" xmlns="http://www.w3.org/2000/svg">
     <image href="${ROOMS[room].img}" x="0" y="0" width="360" height="480" preserveAspectRatio="xMidYMid slice"/>${inner}
     <defs><filter id="grain" x="0" y="0" width="100%" height="100%"><feTurbulence type="fractalNoise" baseFrequency=".85" numOctaves="2" stitchTiles="stitch"/>
       <feColorMatrix values="0 0 0 0 .24  0 0 0 0 .16  0 0 0 0 .09  0 0 0 .6 0"/></filter>
-      <radialGradient id="vig" cx="180" cy="236" r="330" gradientUnits="userSpaceOnUse"><stop offset=".5" stop-color="#000" stop-opacity="0"/><stop offset="1" stop-color="#0a0603" stop-opacity=".72"/></radialGradient></defs>
+      <radialGradient id="vig" cx="180" cy="236" r="330" gradientUnits="userSpaceOnUse"><stop offset=".5" stop-color="#000" stop-opacity="0"/><stop offset="1" stop-color="#0a0603" stop-opacity=".72"/></radialGradient>
+      <linearGradient id="figCoat" x1="0" y1="0" x2="1" y2="0"><stop offset="0" stop-color="#3a2c20"/><stop offset=".55" stop-color="#1e1610"/><stop offset="1" stop-color="#120d08"/></linearGradient>
+      <linearGradient id="figSkin" x1="0" y1="0" x2="1" y2="0"><stop offset="0" stop-color="#7a5c40"/><stop offset=".6" stop-color="#4a3624"/><stop offset="1" stop-color="#2e2016"/></linearGradient></defs>
     <rect class="fx" x="-200" y="-300" width="760" height="1100" filter="url(#grain)" opacity=".28"/>
     <rect class="fx" x="-200" y="-300" width="760" height="1100" fill="url(#vig)"/>
     <rect class="dim-layer" width="360" height="480" fill="#0a0603" opacity="${dim}" pointer-events="none"/></svg>`;
@@ -276,7 +322,7 @@ function sha256js(str) {
       <path d="M186 44 h${cw} v152 q-${cw / 2} 8 -${cw} 0z" fill="#7a2018"/><path d="M314 44 h-${cw} v152 q${cw / 2} 8 ${cw} 0z" fill="#7a2018"/>
       <path d="M196 46 v148 M206 46 v150 M304 46 v148 M294 46 v150" stroke="#5e1611" stroke-width="2"/>`,
       [[180, 40, 32, 164], [288, 40, 32, 164]])}
-    ${obj('leejun', `<rect x="296" y="252" width="46" height="7" fill="#2c1c0e"/><rect x="334" y="204" width="7" height="100" fill="#2c1c0e"/><rect x="299" y="259" width="5" height="44" fill="#2c1c0e"/>${fig(318, 180, 34, 80)}`,
+    ${obj('leejun', `<rect x="334" y="204" width="7" height="100" fill="#2c1c0e"/><rect x="296" y="262" width="46" height="7" fill="#2c1c0e"/><rect x="299" y="269" width="5" height="34" fill="#2c1c0e"/>${person(318, 182, 0.74, 'seat', { mustache: 1 })}`,
       [[294, 176, 50, 126]])}
     ${obj('calendar', `<rect x="30" y="52" width="52" height="68" fill="#efe3c6" stroke="#5a4028"/><rect x="30" y="52" width="52" height="15" fill="#8f2a1d"/>
       <text x="56" y="63" font-size="9" text-anchor="middle" fill="#efe3c6" font-family="serif">1907</text><text x="56" y="76" font-size="7" text-anchor="middle" fill="#3b2a1a" font-family="serif">APRIL</text>${calGrid}`,
@@ -284,7 +330,7 @@ function sha256js(str) {
     ${obj('coat', `<rect x="126" y="44" width="44" height="5" fill="#2e1e10"/><circle cx="148" cy="54" r="3" fill="#8f7444"/>
       <path d="M148 56 l-18 14 l-6 120 l18 4 l6 -62 l6 62 l18 -4 l-6 -120z" fill="#2b2622"/><path d="M140 66 l8 22 l8 -22" stroke="#46403a" stroke-width="2" fill="none"/>`,
       [[120, 44, 56, 156]])}
-    ${obj('leewj', fig(86, 166, 40, 74), [[62, 160, 48, 66]])}
+    ${obj('leewj', person(86, 158, 1, 'desk'), [[62, 160, 48, 66]])}
     ${obj('desk', `<rect x="18" y="232" width="140" height="10" fill="#3e2814"/><rect x="24" y="242" width="128" height="40" fill="#4a3018"/>
       <rect x="30" y="248" width="54" height="28" fill="none" stroke="#3a2412"/><rect x="92" y="248" width="54" height="28" fill="none" stroke="#3a2412"/>
       <rect x="26" y="282" width="8" height="30" fill="#3e2814"/><rect x="142" y="282" width="8" height="30" fill="#3e2814"/>
@@ -325,7 +371,7 @@ function sha256js(str) {
       <circle cx="56" cy="172" r="14" fill="#efe3c6" stroke="#3a2614" stroke-width="3"/><path d="M56 172 v-8 M56 172 h6" stroke="#3a2614" stroke-width="1.6"/>
       <rect x="170" y="438" width="14" height="10" fill="#e6dcc3" transform="rotate(20 176 442)"/><rect x="128" y="462" width="12" height="9" fill="#dcd1b6" transform="rotate(-14 134 466)"/></g>
     ${obj('board', `<rect x="176" y="40" width="168" height="168" fill="#6f4d2b" stroke="#3d2914" stroke-width="6"/>${cards}`, [[172, 36, 176, 176]])}
-    ${obj('host', `${fig(130, 116, 46, 132, '#241c15')}<path d="M122 138 q8 14 16 0 v8 q-8 8 -16 0z" fill="#d9d0c0"/>`, [[104, 112, 54, 140]])}
+    ${obj('host', person(131, 112, 0.7, 'stand', { beard: 1, hair: '#cfc6b3' }), [[104, 112, 54, 140]])}
     ${obj('typeset', `<polygon points="16,304 166,304 160,356 22,356" fill="#5a3b20" stroke="#2e1d0f" stroke-width="3"/>${caseGrid}
       <rect x="24" y="356" width="8" height="40" fill="#2e1d0f"/><rect x="150" y="356" width="8" height="40" fill="#2e1d0f"/>`, [[12, 296, 158, 100]])}
     ${obj('press', `<rect x="210" y="262" width="120" height="20" fill="#26221f"/><rect x="222" y="282" width="16" height="130" fill="#26221f"/><rect x="302" y="282" width="16" height="130" fill="#26221f"/>
@@ -348,7 +394,7 @@ function sha256js(str) {
       <polygon points="108,150 124,155 124,186 108,184" fill="#2e1e10" stroke="#a88a4a" stroke-width="1.5"/><polygon points="252,150 236,155 236,186 252,184" fill="#2e1e10" stroke="#a88a4a" stroke-width="1.5"/>
       <polygon points="70,480 152,270 156,270 82,480" fill="#c8a24a" opacity=".3"/><polygon points="290,480 208,270 204,270 278,480" fill="#c8a24a" opacity=".3"/>
       <polygon points="156,270 204,270 248,480 112,480" fill="#c7cbc2" opacity=".07"/></g>
-    ${obj('endwin', `<rect x="156" y="126" width="48" height="64" fill="#c7cbc2"/><rect x="178" y="126" width="4" height="64" fill="#4f3f30"/>${fig(180, 172, 28, 92, '#15100b')}`,
+    ${obj('endwin', `<rect x="156" y="126" width="48" height="64" fill="#c7cbc2"/><rect x="178" y="126" width="4" height="64" fill="#4f3f30"/>${person(180, 177, 0.46, 'stand', { hat: 1, paper: 1 })}`,
       [[150, 120, 60, 148]])}
     ${obj('door', `<polygon points="30,160 100,182 100,314 30,424" fill="#4a2f18" stroke="#2a190b" stroke-width="3"/><circle cx="88" cy="258" r="3.5" fill="#c8a24a"/>
       <polygon points="40,186 90,202 90,240 40,230" fill="none" stroke="#2a190b" stroke-width="2"/>`, [[28, 160, 74, 186]])}
@@ -361,7 +407,7 @@ function sha256js(str) {
     let rows = '';
     for (let r = 0; r < 2; r++) for (let c = 0; c < 7; c++) {
       const x = 20 + c * 50 + (r ? 25 : 0), y = 400 + r * 40;
-      rows += `<rect x="${x - 16}" y="${y + 6}" width="32" height="30" fill="#2a1d12"/><circle cx="${x}" cy="${y}" r="10" fill="#17110b"/>`;
+      rows += backOf(x, y, (r * 7 + c) % 3);
     }
     return svgWrap('hall', `
     <defs><radialGradient id="glowH"><stop offset="0" stop-color="#ffe2a0" stop-opacity=".42"/><stop offset="1" stop-color="#ffe2a0" stop-opacity="0"/></radialGradient><linearGradient id="beam" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#fff2c8" stop-opacity=".3"/><stop offset="1" stop-color="#fff2c8" stop-opacity="0"/></linearGradient></defs>
@@ -377,7 +423,7 @@ function sha256js(str) {
       <polygon points="170,40 190,40 236,284 124,284" fill="url(#beam)"/></g>
     ${obj('podium', `<polygon points="156,176 204,176 198,254 162,254" fill="#3e2814" stroke="#24170b" stroke-width="2"/><rect x="150" y="170" width="60" height="10" fill="#5a3b20"/>`,
       [[146, 164, 68, 92]])}
-    ${obj('leewj', fig(240, 150, 36, 102), [[218, 144, 46, 110]])}
+    ${obj('leewj', person(240, 150, 0.52, 'stand'), [[218, 144, 46, 110]])}
     ${obj('papers', `<rect x="80" y="304" width="34" height="24" fill="#efe3c6" transform="rotate(-18 97 316)"/><rect x="130" y="320" width="34" height="24" fill="#e6dcc3" transform="rotate(12 147 332)"/>
       <rect x="182" y="300" width="34" height="24" fill="#efe3c6" transform="rotate(-6 199 312)"/><rect x="226" y="326" width="34" height="24" fill="#ece2c8" transform="rotate(24 243 338)"/>
       <rect x="110" y="344" width="34" height="24" fill="#e6dcc3" transform="rotate(4 127 356)"/><rect x="250" y="296" width="34" height="24" fill="#efe3c6" transform="rotate(-30 267 308)"/>`,
