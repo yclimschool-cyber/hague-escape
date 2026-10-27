@@ -212,7 +212,7 @@ function sha256js(str) {
     p2: ['방이 너무 밝으면 신호가 잘 안 보인다.', '부호표가 반쪽뿐이라면, 나머지는 트렁크를 다시 살펴보자.'],
     p3: ['문장 아래 작은 글씨를 한 단어씩 읽고, 빈칸에 들어가 말이 되는 뜻을 사전에서 찾아보자.', '사전 앞장의 la/le 메모로 후보를 줄일 수 있다.'],
     p4: ['스테드는 게시판을 프랑스어 이름 순서로 꽂았다고 했다.', '대한제국의 프랑스어 이름은 어느 나라 바로 뒤에 와야 할까?'],
-    p5: ['거울이 필요하다면, 처음 방의 세면대를 떠올려보자.', '메모 옆의 화살표가 가리키는 방향을 생각해보자.'],
+    p5: ['거울이 필요하다면 처음 방의 세면대를, 암호가 막힌다면 경운궁에서 받은 쪽지를 떠올려보자.', '메모를 오른쪽 끝부터 읽은 뒤, 첫 글자는 1칸, 둘째 글자는 2칸… 초성을 앞으로 되돌려보자.'],
     p6: ['특사가 결코 하지 않았을 말이 두 장 섞여 있다.', '연설은 자기소개로 시작해 호소로 끝난다.'],
     fin: ['편집실에서 빛나던 글자에 무엇이 붙어 있었지?', '원고 모서리의 기호 순서와 비교해보자.'],
   };
@@ -410,8 +410,13 @@ function sha256js(str) {
     note: { nm: '쪽지', ic: ICON.note, view: () => `<div class="doc doc-note">폐하께서 이 길을 명하신 날을<br>잊지 마라.</div>${cap('이준의 외투 주머니에서 나온 쪽지. 이준의 필체다.')}` },
     receipt: { nm: '찢어진 영수증', ic: ICON.receipt, view: () => `<div class="doc doc-receipt"><div class="doc-label">앞면</div><div class="smudge">Hôtel ····· fl. ··· ·· 19··<br>······ ··· ·····</div></div>${cap('물에 번져 알아볼 수 없다.')}
       <div class="doc doc-receipt back"><div class="doc-label">뒷면</div><div class="brush">二</div></div>${cap('찢긴 가장자리에 붓글씨 한 글자만 남아 있다. 어딘가에서 본 듯한 필체다.')}` },
-    cipher: { nm: '암호표', ic: ICON.cipher, view: () => `<div class="doc doc-scroll"><h3>초성을 한 칸 뒤로 민다</h3><div class="cipher-chain">ㄱ→ㄴ→ㄷ→ㄹ→ㅁ→ㅂ→ㅅ→ㅇ→ㅈ→ㅊ→ㅋ→ㅌ→ㅍ→ㅎ→ㄱ</div>
-      <p class="muted">중성과 종성은 그대로 둔다.<br>※ 풀 때는 반대로, 초성을 한 칸 앞으로 돌린다.</p></div>` },
+    // 낡은 쪽지 사본: 규칙은 보여주지 않고 예시만 준다.
+    // (숨은 규칙: n번째 글자의 초성을 자음 순서에서 n칸 뒤로 민다. 끝에 닿으면 처음으로 돌아간다.)
+    cipher: { nm: '낡은 쪽지 사본', ic: ICON.cipher, view: () => `<div class="flip-card"><div class="doc doc-copy face front">
+        <div class="doc-label">앞면</div>
+        <table class="copy-pairs"><tr><td>이준</td><td>→</td><td>지쿤</td></tr><tr><td>경운궁</td><td>→</td><td>녕춘룽</td></tr><tr><td>한성</td><td>→</td><td>간정</td></tr></table></div>
+      <div class="doc doc-copy face back" hidden><div class="doc-label">뒷면</div><p class="copy-back">"경운궁의 그 밤,<br>처음 배운 법식을 잊지 마라."</p></div></div>
+      <div class="row"><button class="btn small" type="button" data-flip>뒤집기</button></div>` },
     dict: { nm: '프랑스어 사전', ic: ICON.dict, view: () => `<div class="doc doc-book"><div class="doc-label">앞장 메모</div><p class="pen">la = 여성 단어 앞<br>le, ce = 남성 단어 앞</p></div>
       <div class="doc doc-book"><div class="doc-label">단어</div><table class="dict-list">${DICT.map(d => `<tr><td>${d[0]}</td><td>${d[1]}</td><td>${d[2]}</td></tr>`).join('')}</table></div>
       <div class="doc doc-book torn"><div class="doc-label">마지막 장 · 모스 부호표</div>${morseTable(AM)}</div>${cap('N 이후는 찢겨 나가고 없다.')}` },
@@ -642,6 +647,13 @@ function sha256js(str) {
     const b = $('#itemView .layer-body'), st = b.scrollTop;
     b.innerHTML = '';
     if (itemOpen === 'telegram') buildTelegram(b); else b.innerHTML = ITEMS[itemOpen].view();
+    // 앞뒷면이 있는 문서
+    b.querySelectorAll('[data-flip]').forEach(btn => btn.addEventListener('click', () => {
+      const card = b.querySelector('.flip-card');
+      card.classList.remove('turn'); void card.offsetWidth; card.classList.add('turn');
+      card.querySelectorAll('.face').forEach(f => { f.hidden = !f.hidden; });
+      sfx.click();
+    }));
     b.scrollTop = top ? 0 : st;
   }
   function closeItem() { itemOpen = null; $('#itemView').hidden = true; }
@@ -855,9 +867,9 @@ function sha256js(str) {
   }
   async function lockOpened() {
     S.f.trunk = 1; save(); sfx.ok(); closeZoom(); renderScene();
-    await say('딸깍— 자물쇠가 풀렸다. 트렁크 안에는 접힌 암호표, 낡은 프랑스어 사전, 그리고 작은 태극기가 들어 있다.');
+    await say('딸깍— 자물쇠가 풀렸다. 트렁크 안에는 낡은 쪽지 사본, 낡은 프랑스어 사전, 그리고 작은 태극기가 들어 있다.');
     addItem('cipher', true); addItem('dict', true); addItem('flag', true);
-    toast('획득: 암호표, 프랑스어 사전, 태극기'); sfx.get();
+    toast('획득: 낡은 쪽지 사본, 프랑스어 사전, 태극기'); sfx.get();
   }
 
   function openCommission() {
@@ -1192,7 +1204,7 @@ function sha256js(str) {
     b.appendChild(el('div', { class: 'telegram' + (ok ? '' : ' mirrored'), 'data-drop': 'telegram' }, `<div class="tg-inner">
         <div class="tg-head">일본 대표단 전보 · 번역본</div>
         <div>"조선 특사들이 7월 8일 연설을 준비 중. 장소를 확인하여 보고하라."</div>
-        <div class="tg-memo"><span>괴겹체눅</span><span class="arrow">←</span></div></div>
+        <div class="tg-memo"><span>뢰뎝케눅</span><span class="arrow">←</span></div></div>
         ${ok ? '<div class="tg-note">맨 아래 메모는 다른 필체다. 스테드의 글씨 같다.<br>※ 일본 측 문서라 \'조선\'이라고 적혀 있다.</div>' : ''}`));
     if (ok && !S.f.p5) {
       b.appendChild(answerBox('p5', '메모 해독', async val => {

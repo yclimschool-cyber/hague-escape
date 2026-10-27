@@ -234,12 +234,11 @@ button { font: inherit; color: inherit; }
 .torn-top::before { content: ''; position: absolute; left: 0; right: 0; top: -1px; height: 16px;
   background: linear-gradient(-44deg, transparent 50%, rgba(20,13,6,.96) 50%) 0 0 / 14px 16px repeat-x; }
 
-/* 사전/암호표 */
+/* 사전 */
 .dict-list { width: 100%; border-collapse: collapse; font-size: 14px; }
 .dict-list td { padding: 4px 2px; border-bottom: 1px dotted rgba(59,42,26,.25); }
 .dict-list td:first-child { font-weight: 700; font-style: italic; }
 .dict-list td:nth-child(2) { color: var(--ink2); font-size: 12px; font-family: var(--sans); }
-.cipher-chain { font-size: 20px; letter-spacing: 1px; text-align: center; line-height: 1.9; font-weight: 600; word-break: keep-all; }
 .brush { font-size: 72px; font-weight: 900; text-align: center; line-height: 1.2; color: var(--ink); }
 .smudge { filter: blur(2.2px); opacity: .6; text-align: center; font-size: 15px; line-height: 1.8; }
 
@@ -375,7 +374,7 @@ button { font: inherit; color: inherit; }
 .doc-receipt::after { content: ''; position: absolute; left: 0; right: 0; bottom: -7px; height: 8px;
   background: linear-gradient(135deg, #f4f0e4 50%, transparent 50%) 0 0 / 10px 8px repeat-x; }
 .doc-receipt.back { transform: rotate(-2deg); }
-/* 두루마리 암호표 */
+/* 두루마리 */
 .doc-scroll { background-color: #ecdcb2; margin: 12px auto 14px; padding: 18px 16px; }
 .doc-scroll::before, .doc-scroll::after { content: ''; position: absolute; left: -8px; right: -8px; height: 12px; border-radius: 6px;
   background: linear-gradient(#8a5a2c, #5a3518 60%, #3e2410); box-shadow: 0 2px 4px rgba(0,0,0,.5); }
@@ -493,3 +492,14 @@ button { font: inherit; color: inherit; }
 #btnMenu { position: absolute; right: 6px; bottom: 5px; }
 #roomNav { padding-right: 40px; }
 #btnNextQ { text-decoration: none; color: var(--ink); }
+
+/* 낡은 쪽지 사본 (앞뒤로 뒤집기) */
+.doc-copy { max-width: 300px; background-color: #e9dcb8; transform: rotate(-.8deg); }
+.flip-card.turn .face { animation: turn .44s ease-out; }
+@keyframes turn { from { transform: rotateY(80deg); opacity: .3; } to { transform: rotate(-.8deg); opacity: 1; } }
+.copy-pairs { margin: 4px auto 2px; border-collapse: collapse; font-size: 22px; font-weight: 700; }
+.copy-pairs td { padding: 6px 6px; }
+.copy-pairs td:first-child { text-align: right; }
+.copy-pairs td:nth-child(2) { color: var(--ink2); font-weight: 400; }
+.copy-pairs td:last-child { font-family: var(--pen); font-size: 30px; font-weight: 400; color: #1c2f55; }
+.copy-back { margin: 6px 0; font-family: var(--pen); font-size: 28px; line-height: 1.35; color: #24180d; text-align: center; }
