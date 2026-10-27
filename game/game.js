@@ -535,15 +535,14 @@ function sha256js(str) {
   }
 
   // ---------- 대사 ----------
-  // 말하는 인물의 실루엣 초상
+  // 말하는 인물의 초상: 장면 속 인물 그림을 가슴 위까지 잘라 쓴다
   function portrait(name) {
-    const base = '<rect width="56" height="56" fill="#c9b48a"/><circle cx="28" cy="23" r="10" fill="#2a1d12"/><path d="M7 56 q2 -19 21 -21 q19 2 21 21z" fill="#2a1d12"/>';
-    const extra = {
-      '이준': '<path d="M23 28.5 q5 2.6 10 0" stroke="#c9b48a" stroke-width="1.4" fill="none"/><path d="M24 39 l4 5 4-5" stroke="#c9b48a" stroke-width="1.2" fill="none"/>',
-      '이위종': '<path d="M18 19 q10 -10 20 0" stroke="#c9b48a" stroke-width="1" fill="none"/><path d="M24 39 l4 6 4-6" stroke="#f3e8cc" stroke-width="1.6" fill="none"/>',
-      '스테드': '<path d="M19 25 q9 17 18 0 v5 q-9 15 -18 0z" fill="#d9d0bd"/><path d="M21 17 q7 -7 14 0" stroke="#d9d0bd" stroke-width="2" fill="none"/>',
-    }[name] || '';
-    return `<svg viewBox="0 0 56 56" aria-hidden="true">${base}${extra}</svg>`;
+    const look = { '이준': { mustache: 1 }, '스테드': { beard: 1, hair: '#cfc6b3' } }[name] || {};
+    return `<svg viewBox="-21 -3 42 42" aria-hidden="true"><defs>
+      <radialGradient id="portBg" cx=".4" cy=".35" r=".8"><stop offset="0" stop-color="#e2cfa2"/><stop offset="1" stop-color="#a88a5c"/></radialGradient>
+      <linearGradient id="figCoat" x1="0" y1="0" x2="1" y2="0"><stop offset="0" stop-color="#3a2c20"/><stop offset=".55" stop-color="#1e1610"/><stop offset="1" stop-color="#120d08"/></linearGradient>
+      <linearGradient id="figSkin" x1="0" y1="0" x2="1" y2="0"><stop offset="0" stop-color="#7a5c40"/><stop offset=".6" stop-color="#4a3624"/><stop offset="1" stop-color="#2e2016"/></linearGradient></defs>
+      <rect x="-21" y="-3" width="42" height="42" fill="url(#portBg)"/>${person(0, 0, 1, 'desk', look)}</svg>`;
   }
   let dlgChain = Promise.resolve(), dlgGen = 0;
   function say(lines, opt = {}) {
