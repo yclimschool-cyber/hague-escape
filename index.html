@@ -82,6 +82,15 @@ figcaption { font-size: 13px; color: var(--ink-soft); text-align: center; }
 .wire td.n { color: var(--ink-soft); font-size: 12px; text-align: right; padding-right: 6px; font-variant-numeric: tabular-nums; border-right: 1px solid var(--rule); }
 .wire td.c { letter-spacing: .16em; }
 
+/* 바꾼 예 / 자음 차례 */
+.pairs { background: var(--paper2); border: 1px solid var(--rule); padding: 18px 12px; display: grid; grid-template-columns: auto auto auto; justify-content: center; gap: 8px 16px;
+  font-size: clamp(18px, 5vw, 22px); font-weight: 600; }
+.pairs .ar { color: var(--seal); }
+.pairs .q { color: var(--seal); font-weight: 900; }
+.order { display: flex; flex-wrap: wrap; gap: 6px; justify-content: center; align-items: center; font-size: 20px; font-weight: 900; }
+.order span { width: 1.9em; height: 1.9em; display: grid; place-items: center; border: 1px solid var(--rule); background: var(--paper2); }
+.order i { font-style: normal; color: var(--seal); font-size: 15px; }
+
 /* 별지 */
 .annex { border: 1.5px dashed var(--seal); padding: 18px; display: flex; flex-direction: column; gap: 14px; }
 .annex p { margin: 0; }
@@ -201,7 +210,22 @@ function sha256js(str) {
   // ---------- 상황별 문서 ----------
   const lawList = items => `<ol class="law">${items.map((t, i) => `<li><span class="jo">제${i + 1}조</span><span>${t}</span></li>`).join('')}</ol>`;
   const annex = (id, text) => `<section><h2>별지 <span class="hj">別紙</span></h2>
-    <div class="annex"><p data-note="${id}">${text}</p><button class="open" type="button" data-open="${id}">별지<br>펼치기</button><div class="grid2" id="${id}" hidden></div></div></section>`;
+    <div class="annex"><p data-note="${id}">${text}</p><button class="open" type="button" data-open="${id}">별지<br>펼치기</button><div class="${id === 'annex1' ? '' : 'grid2'}" id="${id}" hidden></div></div></section>`;
+  const pairs = rows => `<div class="pairs">${rows.map(([a, b, q]) => `<span>${a}</span><span class="ar">→</span><span${q ? ' class="q"' : ''}>${b}</span>`).join('')}</div>`;
+
+  const CASE1 = `
+    <p class="lead">대한제국, 한성부 경운궁. 통감부 검문에 걸려도 들키지 않도록 밀지의 목적지를 암호로 바꿔 적어라.</p>
+    <section>
+      <h2>내관의 쪽지 <span class="hj">內官 書紙</span></h2>
+      <p class="intro">내관이 궁에서 쓰던 암호 연습 쪽지를 건네주었다. 법식은 적혀 있지 않고, 바꾼 예만 남아 있다.</p>
+      ${pairs([['이준', '지쿤'], ['경운궁', '녕춘룽'], ['한성', '간정']])}
+    </section>
+    <section>
+      <h2>밀지 <span class="hj">密旨</span></h2>
+      ${pairs([['헤이그', '？', true]])}
+      <p class="ask">같은 법식으로 목적지를 바꿔 적으라.</p>
+    </section>
+    ${annex('annex1', '법식이 보이지 않거든 별지를 펼쳐라. 내관이 쓰던 문서의 한 구석이다.')}`;
 
   const CASE2 = `
     <p class="lead">접선 장소에 나타난 자가 참된 동지인지, 일본의 첩자인지 가려내라.</p>
@@ -263,16 +287,18 @@ function sha256js(str) {
 
   // answer: 이 문항 정답의 해시(다음 장을 연다). null이면 정답 확인 없이 '다음 장' 버튼.
   const QS = [
-    { k: '상황 1', t: '1번 문항', html: TODO(1), answer: null },
-    { k: '상황 2 · 블라디보스토크', t: '증표 확인', html: CASE2, answer: null },
-    { k: '상황 3 · 상트페테르부르크', t: '밀전 해독', html: CASE3, answer: null },
-    { k: '상황 4 · 헤이그', t: '닫힌 문 너머로', html: GAME, answer: 'bdf994a04a96261467ced466c6b4e59590c378aa911acf699dd373bdfc347938',
+    { k: '상황 1', t: '밀지 암호', html: CASE1, answer: null },
+    { k: '상황 2', t: '증표 확인', html: CASE2, answer: null },
+    { k: '상황 3', t: '밀전 해독', html: CASE3, answer: null },
+    { k: '상황 4', t: '닫힌 문 너머로', html: GAME, answer: 'bdf994a04a96261467ced466c6b4e59590c378aa911acf699dd373bdfc347938',
       gateText: '게임을 마치고 받은 쪽지 내용을 폼에 적었다면, 같은 내용을 여기에도 적으세요. 게임을 이 기기에서 마쳤다면 다음 장이 저절로 열립니다.' },
     { k: '상황 5', t: '5번 문항', html: TODO(5), answer: null },
   ];
 
   // 별지 표 내용
   const ANNEX = {
+    annex1: { note: '자음의 차례 — 끝에 다다르면 처음으로 돌아간다. 바뀐 칸 수를 글자마다 세어보라.',
+      html: () => `<div class="order" aria-label="자음 순서">${'ㄱㄴㄷㄹㅁㅂㅅㅇㅈㅊㅋㅌㅍㅎ'.split('').map(c => `<span>${c}</span>`).join('')}<i>↺ ㄱ</i></div>` },
     annex2: { note: '甲(55) 배수표 — 1728을 넘지 않는 가장 큰 수를 찾아라.',
       rows: () => Array.from({ length: 35 }, (_, i) => ['× ' + (i + 1), String(55 * (i + 1))]) },
     annex3: { note: '소수 점획표 — 전보의 모양과 같은 것을 찾아라.',
@@ -328,8 +354,8 @@ function sha256js(str) {
     const wrap = box.parentElement;
     wrap.querySelector('[data-open]').hidden = true;
     wrap.querySelector('[data-note]').textContent = ANNEX[id].note;
-    box.innerHTML = '';
-    ANNEX[id].rows().forEach(([v, s]) => {
+    box.innerHTML = ANNEX[id].html ? ANNEX[id].html() : '';
+    if (ANNEX[id].rows) ANNEX[id].rows().forEach(([v, s]) => {
       const d = el('div'); d.append(el('span', { class: 'v' }), el('span', { class: 's' }));
       d.firstChild.textContent = v; d.lastChild.textContent = s; box.appendChild(d);
     });
