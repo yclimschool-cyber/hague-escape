@@ -1380,10 +1380,12 @@ function sha256js(str) {
         <div class="sub">평화(${w})를 논하는 회의에,<br>끝내 채워지지 않은 ${nth} 번째 자리.</div><div class="stamp">特使</div></div>
       <div class="okbox reveal" ${dl()}><strong>✅ 헤이그 탈출 성공!</strong>구글 폼으로 돌아가 이위종이 건넨 쪽지의 내용을 일지에 기록하세요.</div>
       <div class="end-actions reveal" ${dl()}><button class="btn big" id="btnCopy">쪽지 내용 복사하기</button>
-        <a class="btn" id="btnNextQ" href="../?q=5">5번 문항 진행하기</a></div>`;
+        <a class="btn" id="btnNextQ" href="../?q=5">5번 문항 진행하기</a>
+        <button class="btn ghost small" id="btnReplay" type="button">방탈출 다시 하기</button></div>`;
     const focus = () => { const box = e.querySelector(animate ? '.okbox' : '.note-card'); if (box && !e.hidden) box.scrollIntoView({ behavior: animate ? 'smooth' : 'auto', block: 'center' }); };
     if (animate) setTimeout(focus, (d + 0.4) * 1000); else focus();
     $('#btnCopy').onclick = () => copyText(w + n);
+    $('#btnReplay').onclick = () => { if (confirm('방탈출을 처음부터 다시 할까요? 지금까지의 진행 기록은 지워집니다.')) resetAll(false); };
   }
   function copyText(t) {
     const done = () => toast('복사했습니다.');

@@ -503,3 +503,4 @@ button { font: inherit; color: inherit; }
 .copy-pairs td:nth-child(2) { color: var(--ink2); font-weight: 400; }
 .copy-pairs td:last-child { font-family: var(--pen); font-size: 30px; font-weight: 400; color: #1c2f55; }
 .copy-back { margin: 6px 0; font-family: var(--pen); font-size: 28px; line-height: 1.35; color: #24180d; text-align: center; }
+#ending .btn.ghost { border-color: #a58c66; color: var(--paper); }
