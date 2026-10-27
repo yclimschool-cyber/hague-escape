@@ -322,7 +322,8 @@ function sha256js(str) {
     '.. .. .. .. ..', '.. .. .. .. .....', '....... -.', '.. .. .. .. ..', '.. ... -...', '-------...', '.. ... -...', '... --...'];
 
   // ---------- 진행 저장 ----------
-  const KEY = 'hague1907_hub_v1';
+  // 답 확인을 넣기 전의 진행 기록으로 장이 열려 있지 않도록 키를 바꿨다
+  const KEY = 'hague1907_hub_v2';
   let S = { started: false, unlocked: 0, cur: 0, annex: {} };
   try { Object.assign(S, JSON.parse(localStorage.getItem(KEY) || '{}')); } catch (e) {}
   S.annex = S.annex || {};
