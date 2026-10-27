@@ -492,3 +492,4 @@ button { font: inherit; color: inherit; }
 @media (max-width: 340px) { .np-body { column-count: 1; } }
 #btnMenu { position: absolute; right: 6px; bottom: 5px; }
 #roomNav { padding-right: 40px; }
+#btnNextQ { text-decoration: none; color: var(--ink); }
