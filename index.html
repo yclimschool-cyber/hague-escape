@@ -298,13 +298,12 @@ function sha256js(str) {
     </section>
     ${annex('annex5', '어디를 봐야 할지 모르겠거든 별지를 펼쳐라.')}`;
 
-  // answer: 이 문항 정답의 해시. 맞게 적어야 다음 장이 열린다.
+  // answer: 이 문항 정답의 해시(맞게 적어야 다음 장이 열림). null이면 '다음 장 넘기기' 버튼으로 넘어간다.
   const QS = [
-    { k: '상황 1', t: '밀지 암호', html: CASE1, answer: '472d66a988a3341a6ab7827c7c282cf027d5de914f9f3ca3ccf341da4121d59e' },
-    { k: '상황 2', t: '증표 확인', html: CASE2, answer: '762f2a688c76f91971e8b7c0d6144c37d683354b4b41ea60e1f3ad5f353bbcb4' },
-    { k: '상황 3', t: '밀전 해독', html: CASE3, answer: 'd6702a0c55c20c38bb9fa67eb62aac29d79387ece1f5e50972540d910d9a1e42' },
-    { k: '상황 4', t: '닫힌 문 너머로', html: GAME, answer: 'bdf994a04a96261467ced466c6b4e59590c378aa911acf699dd373bdfc347938',
-      gateText: '게임을 마치고 받은 쪽지 내용을 폼에 적었다면, 같은 내용을 여기에도 적으세요.' },
+    { k: '상황 1', t: '밀지 암호', html: CASE1, answer: null },
+    { k: '상황 2', t: '증표 확인', html: CASE2, answer: null },
+    { k: '상황 3', t: '밀전 해독', html: CASE3, answer: null },
+    { k: '상황 4', t: '닫힌 문 너머로', html: GAME, answer: null },
     { k: '상황 5', t: '귀국 일지', html: CASE5, answer: null },
   ];
 
@@ -384,9 +383,13 @@ function sha256js(str) {
     });
 
     if (i === QS.length - 1) return;
-    // 마지막 장 말고는 언제나 답을 적어야 다음 장으로 넘어간다 (이미 연 장도 마찬가지)
     const gate = el('div', { class: 'gate' });
-    {
+    if (!q.answer) {
+      if (S.unlocked <= i) gate.appendChild(el('p', null, `폼의 ${i + 1}번 문항을 풀었다면 다음 장으로 넘어가세요.`));
+      const b = el('button', { class: 'btn', type: 'button' }, '다음 장 넘기기');
+      b.onclick = () => unlock(i);
+      gate.appendChild(b);
+    } else {
       gate.appendChild(el('p', null, q.gateText || `폼의 ${i + 1}번 문항에 적은 답을 여기에도 적으면 다음 장이 열립니다.`));
       const row = el('div', { class: 'row' });
       const inp = el('input', { type: 'text', placeholder: `${i + 1}번 답`, autocomplete: 'off', spellcheck: 'false' });
