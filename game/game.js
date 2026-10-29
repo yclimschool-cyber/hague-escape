@@ -1241,9 +1241,9 @@ function sha256js(str) {
     b.appendChild(el('p', { class: 'desc' }, ok ? '거울에 비춰 읽은 종이.' : '글자가 모두 좌우로 뒤집혀 있어 제대로 읽을 수가 없다.'));
     b.appendChild(el('div', { class: 'telegram' + (ok ? '' : ' mirrored'), 'data-drop': 'telegram' }, `<div class="tg-inner">
         <div class="tg-head">일본 대표단 전보 · 번역본</div>
-        <div>"조선 특사들이 7월 8일 연설을 준비 중. 장소를 확인하여 보고하라."</div>
+        <div>"한국 특사들이 7월 8일 연설을 준비 중. 장소를 확인하여 보고하라."</div>
         <div class="tg-memo"><span>뢰뎝케눅</span><span class="arrow">←</span></div></div>
-        ${ok ? '<div class="tg-note">맨 아래 메모는 다른 필체다. 스테드의 글씨 같다.<br>※ 일본 측 문서라 \'조선\'이라고 적혀 있다.</div>' : ''}`));
+        ${ok ? '<div class="tg-note">맨 아래 메모는 다른 필체다. 스테드의 글씨 같다.</div>' : ''}`));
     if (ok && !S.f.p5) {
       b.appendChild(answerBox('p5', '메모 해독', async val => {
         const v = normKo(val);
