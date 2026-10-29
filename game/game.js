@@ -165,7 +165,7 @@ function sha256js(str) {
   const SIGNAL = [83, 84, 69, 65, 68];
 
   const P3 = [
-    { pre: 'Nous venons de la', post: '.', gd: '우리는 대한제국에서 왔습니다.' },
+    { pre: 'Nous sommes les envoyés de la', post: '.', gd: '우리는 대한제국의 특사입니다.' },
     { cols: [['Le', '그'], null, ['a pris', '빼앗았다'], ['nos droits', '우리의 권리를'], ['par la force.', '힘으로']] },
     { pre: 'Ce', post: "a été signé sans l'accord de l'Empereur.", gd: '그 조약은 황제의 동의 없이 맺어졌습니다.' },
     // 가이드 없는 문장: [프랑스어, 단어별 직역], null = 빈칸
@@ -213,7 +213,7 @@ function sha256js(str) {
     p3: ['문장 아래 작은 글씨를 한 단어씩 읽고, 빈칸에 들어가 말이 되는 뜻을 사전에서 찾아보자.', '사전 앞장의 la/le 메모로 후보를 줄일 수 있다.'],
     p4: ['스테드는 게시판을 프랑스어 이름 순서로 꽂았다고 했다.', '대한제국의 프랑스어 이름은 어느 나라 바로 뒤에 와야 할까?'],
     p5: ['거울이 필요하다면 처음 방의 세면대를, 암호가 막힌다면 경운궁에서 받은 쪽지를 떠올려보자.', '메모를 오른쪽 끝부터 읽은 뒤, 첫 글자는 1칸, 둘째 글자는 2칸… 초성을 앞으로 되돌려보자.'],
-    p6: ['특사가 결코 하지 않았을 말이 두 장 섞여 있다.', '연설은 자기소개로 시작해 호소로 끝난다.'],
+    p6: ['특사가 결코 하지 않았을 말이 두 장 섞여 있다.', '연설은 자기소개로 시작해 호소로 끝난다. 그 사이는 지난 일(1905년)에서 지금의 일 순서다.'],
     fin: ['편집실에서 빛나던 글자에 무엇이 붙어 있었지?', '원고 모서리의 기호 순서와 비교해보자.'],
   };
 
@@ -1368,9 +1368,9 @@ function sha256js(str) {
       <p class="cut" ${dl()}>펜을 굴리던 기자들의 손이 멈추고, 연설이 끝나자 박수가 쏟아진다.</p>
       <p class="cut" ${dl()}>회의장의 문은 끝내 열리지 않았다. 하지만 그날만큼은 세계가 대한제국의 목소리를 들었다.</p>
         </div></div>
-      <div class="speech reveal" ${dl()}><b>이위종</b>"${w}, 프랑스어로 평화라는 뜻이오. 그리고 ${cnt} 나라가 앉은 회의장에서, 우리 자리는 ${nth} 번째였소. 끝내 아무도 앉지 못한 자리."</div>
+      <div class="speech reveal" ${dl()}><b>이위종</b>"${w}, 프랑스어로 평화라는 뜻이오. 그리고 ${cnt} 나라가 앉은 회의장에서, 우리는 ${nth} 번째 나라였소. 우리 자리는 끝내 비어 있었소."</div>
       <div class="note-card paper-tex reveal" ${dl()}><div class="muted">📜 이위종이 건넨 쪽지</div><div class="big">${w} ${n}</div>
-        <div class="sub">평화(${w})를 논하는 회의에,<br>끝내 채워지지 않은 ${nth} 번째 자리.</div><div class="stamp">特使</div></div>
+        <div class="sub">평화(${w})를 논하는 회의에,<br>끝내 채워지지 않은 ${nth} 번째 나라의 자리.</div><div class="stamp">特使</div></div>
       <div class="okbox reveal" ${dl()}><strong>✅ 헤이그 탈출 성공!</strong>구글 폼으로 돌아가 이위종이 건넨 쪽지의 내용을 일지에 기록하세요.</div>
       <div class="end-actions reveal" ${dl()}><button class="btn big" id="btnCopy">쪽지 내용 복사하기</button>
         <a class="btn" id="btnNextQ" href="../?q=5">5번 문항 진행하기</a>
@@ -1404,9 +1404,22 @@ function sha256js(str) {
     show('#ending');
     const e = $('#ending'); e.className = 'screen fail'; e.scrollTop = 0;
     e.innerHTML = `<div class="fail-title reveal">감시망에 걸렸다</div>
-      <p class="cut">일본 대표단의 감시망이 일행을 옭아맨다. 연설할 기회는 사라지고, 일행은 회의장 밖에서 아무것도 하지 못한 채 무거운 발걸음으로 귀국길에 오른다.</p>
-      <div class="end-actions reveal" style="animation-delay:1.4s"><button class="btn big" id="btnRetry">헤이그 도착 직후로 돌아가기</button></div>`;
-    $('#btnRetry').onclick = () => resetAll(false);
+      <p class="cut">일본 대표단의 감시망이 일행을 옭아맨다. 이대로라면 연설할 기회는 사라지고, 일행은 회의장 밖에서 아무것도 하지 못한 채 귀국길에 오르게 된다.</p>
+      <p class="cut">하지만 아직 늦지 않았다. 감시의 눈을 피해 다시 움직여 보자.</p>
+      <div class="end-actions reveal" style="animation-delay:1.4s"><button class="btn big" id="btnRetry">복도로 돌아가 다시 시도하기</button>
+        <button class="btn ghost small" id="btnRestart" type="button">처음부터 다시 하기</button></div>`;
+    $('#btnRetry').onclick = retryCorridor;
+    $('#btnRestart').onclick = () => { if (confirm('방탈출을 처음부터 다시 할까요? 지금까지의 진행 기록은 지워집니다.')) resetAll(false); };
+  }
+
+  // 감시망 실패: 객실·편집실 진행은 그대로 두고 복도 진입 시점(게이지 0)부터 다시
+  async function retryCorridor() {
+    cancelDialog(); closeLayers();
+    S.phase = 'play'; S.gauge = 0; S.room = 'corridor';
+    S.rooms = ['hotel', 'editorial', 'corridor'];
+    delete S.locks.p5; delete lastMsg.p5;
+    save(); show('#game'); renderAll();
+    await say('다시 복도. 낯선 남자는 아직 신문 뒤에서 이쪽을 살피고 있다. 이번에는 서둘러야 한다.', { dark: true });
   }
 
   function resetAll(toTitle) {

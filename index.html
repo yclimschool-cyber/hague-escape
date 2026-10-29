@@ -144,11 +144,11 @@ footer { font-size: 12px; color: var(--ink-soft); text-align: center; border-top
 
   <div id="intro" class="leaf">
     <div class="notice">
-      이 문서는 <b>구글 폼과 함께</b> 펼쳐 봅니다.
+      이 문서는 <b><a href="https://docs.google.com/forms/d/e/1FAIpQLSfGLf0fJa8Nw4AVo9U66gaMhye-Q41zQfN_3yymcLsuOunLZw/viewform" target="_blank" rel="noopener">구글 폼</a>과 함께</b> 펼쳐 봅니다.
       <ol>
         <li>구글 폼과 이 문서를 <b>둘 다 열어 두세요.</b> (폼은 다른 탭이나 다른 기기에서)</li>
         <li>폼의 문항을 풀 때, 여기서 <b>같은 번호의 장</b>을 보며 단서를 찾으세요.</li>
-        <li>폼에 정답을 적었다면, 같은 답을 이 문서에도 적어야 <b>다음 장</b>이 열립니다.</li>
+        <li>폼에서 정답을 맞혔다면, 이 문서에서 <b>다음 장 넘기기</b>를 눌러 다음 장을 여세요.</li>
       </ol>
     </div>
     <button id="btnStart" class="btn start" type="button">문서 펼치기</button>
@@ -422,7 +422,13 @@ function sha256js(str) {
   $('#btnStart').onclick = start;
   // 게임 엔딩의 '5번 문항 진행하기'에서 왔을 때 (?q=5)
   const want = +(new URLSearchParams(location.search).get('q') || 0);
-  if (want) { S.cur = want - 1; start(); }
+  // 폼의 [특사문서] 링크(?q=N)로 처음 들어온 경우에도 그 장이 바로 열리게 한다.
+  // 앞 장에 답 확인(answer)이 걸려 있지 않을 때만 건너뛰어 연다.
+  if (want >= 1 && want <= QS.length) {
+    const k = want - 1;
+    if (QS.slice(0, k).every(q => !q.answer)) { S.unlocked = Math.max(S.unlocked, k); save(); }
+    S.cur = k; start();
+  }
   else if (S.started) start();
 })();
 </script>
